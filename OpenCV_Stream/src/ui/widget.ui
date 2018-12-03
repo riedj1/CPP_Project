@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Widget</class>
+ <widget class="QWidget" name="Widget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1200</width>
+    <height>800</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="autoFillBackground">
+   <bool>true</bool>
+  </property>
+  <widget class="QPushButton" name="pushButton_open_Webcam">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>60</y>
+     <width>120</width>
+     <height>70</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Camera on</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_close_Webcam">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>150</y>
+     <width>120</width>
+     <height>70</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Camera off</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="gui_window">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>50</y>
+     <width>531</width>
+     <height>391</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="scaledContents">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox_CannyEdge">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>279</y>
+     <width>101</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Canny Edge</string>
+   </property>
+  </widget>
+  <widget class="QSlider" name="horizontalSlider_CannyEdge">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>340</y>
+     <width>160</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="maximum">
+    <number>200</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox_FaceDetection">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>390</y>
+     <width>111</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Face Detection</string>
+   </property>
+  </widget>
+  <widget class="QSlider" name="horizontalSlider_FaceDetection">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>430</y>
+     <width>160</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="maximum">
+    <number>100</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox_RGB_Modifier">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>490</y>
+     <width>121</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>RGB Modifier</string>
+   </property>
+  </widget>
+  <widget class="QSlider" name="verticalSlider_R">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>530</y>
+     <width>16</width>
+     <height>160</height>
+    </rect>
+   </property>
+   <property name="maximum">
+    <number>365</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Vertical</enum>
+   </property>
+  </widget>
+  <widget class="QSlider" name="verticalSlider_G">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>530</y>
+     <width>16</width>
+     <height>160</height>
+    </rect>
+   </property>
+   <property name="maximum">
+    <number>365</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Vertical</enum>
+   </property>
+  </widget>
+  <widget class="QSlider" name="verticalSlider_B">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>530</y>
+     <width>16</width>
+     <height>160</height>
+    </rect>
+   </property>
+   <property name="maximum">
+    <number>365</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Vertical</enum>
+   </property>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
