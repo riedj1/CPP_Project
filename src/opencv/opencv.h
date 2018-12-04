@@ -21,6 +21,7 @@ class OpenCV
 {
     private:
         int _queue_length = 1000;
+        cv::Mat _output, _output1;
 
     public:        
         cv::VideoCapture startStream();
@@ -36,7 +37,7 @@ class OpenCV
             _cv_buffer.wait(buff_lock, [this]{ return !isFull(); });
             _buffer.push_front(_frame);
             buff_lock.unlock();
-            _cv_buffer.notify_all();
+            _cv_buffer.notify_one();
         }
 
         cv::Mat get()
@@ -46,7 +47,7 @@ class OpenCV
             cv::Mat request = _buffer.back();
             _buffer.pop_back();
             buff_lock.unlock();
-            _cv_buffer.notify_all();
+            _cv_buffer.notify_one();
             return request;
         }
 

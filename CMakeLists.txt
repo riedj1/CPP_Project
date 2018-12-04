@@ -34,36 +34,25 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 # Populate a CMake variable with the sources
 set(APP_SOURCES
     src/main.cpp
-	src/opencv.cpp
-	src/opencv.h
-    src/data/haarcascade_eye_tree_eyeglasses.xml
-    src/data/haarcascade_frontalface_alt2.xml
-    src/data/haarcascade_frontalcatface_extended.xml
+	src/opencv/opencv.cpp
+	src/opencv/opencv.h
+	src/data/haarcascade_frontalface_alt2.xml
     src/ui/widget.cpp
     src/ui/widget.h
     src/ui/widget.ui
-#    src/ui/qcustomplot-source/qcustomplot.cpp
-#    src/ui/qcustomplot-source/qcustomplot.h
 )
 
 set(APP_INCLUDE_DIRS
     src
     src/data
     src/ui
-    src/ui/qcustomplot-source
+	src/opencv
 )
 
 include_directories(${APP_INCLUDE_DIRS})
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/src/data/haarcascade_frontalcatface_extended.xml
-    DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/src/data/haarcascade_frontalface_alt2.xml
-    DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/src/data/haarcascade_eye_tree_eyeglasses.xml
-    DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
+	DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # Add an executable to the project and sources
 add_executable(${PROJECT_NAME} ${APP_SOURCES})

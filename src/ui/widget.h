@@ -45,7 +45,6 @@ class Widget : public QWidget
         explicit Widget(QWidget *parent = nullptr);
         ~Widget();
 
-
     private slots:
         void on_pushButton_open_Webcam_clicked();
         void on_pushButton_close_Webcam_clicked();
@@ -62,6 +61,8 @@ class Widget : public QWidget
         void on_verticalSlider_G_valueChanged();
         void on_verticalSlider_B_valueChanged();
         void rgb_modifier();
+        void on_checkBox_GOA_Mode_clicked(bool checked);
+        void goa_mode();
 };
 
 
