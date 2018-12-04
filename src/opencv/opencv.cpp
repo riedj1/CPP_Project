@@ -1,5 +1,6 @@
 #include "opencv.h"
 #include "widget.h"
+#include "framerate.h"
 
 #include <thread>
 #include <chrono>
@@ -45,14 +46,15 @@ cv::Mat OpenCV::getFrameColor()
 // get gray frame of ringbuffer
 cv::Mat OpenCV::getFrameGray()
 {
-    cv::Mat _output = get();
+    _output = get();
     cv::cvtColor(_output, _output1, CV_BGR2GRAY);
     return _output1;
 }
 
 // face detection on frame from ring buffer
-cv::Mat OpenCV::getFaceFrame(cv::Mat _frame, float circle_dia)
+cv::Mat OpenCV::getFaceFrame(float circle_dia)
 {
+    _frameFace = getFrameColor();
     circle_dia = circle_dia / 100;
     // Initialize the inbuilt Harr Cascade frontal face detection
     cv::CascadeClassifier face_cascade;
@@ -62,7 +64,7 @@ cv::Mat OpenCV::getFaceFrame(cv::Mat _frame, float circle_dia)
     std::vector<cv::Rect> faces;
 
     // Detect faces
-    face_cascade.detectMultiScale(_frame, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE,
+    face_cascade.detectMultiScale(_frameFace, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE,
                                   cv::Size(120, 120));
 
     // Show the results
@@ -72,11 +74,30 @@ cv::Mat OpenCV::getFaceFrame(cv::Mat _frame, float circle_dia)
                          static_cast<int>(faces[i].width*0.5),
                          static_cast<int>(faces[i].y + faces[i].height*0.5));
 
-        ellipse(_frame, center,
+        ellipse(_frameFace, center,
                 cv::Size(static_cast<int>(faces[i].width*circle_dia),
                          static_cast<int>(faces[i].height*circle_dia)),
                          0, 0, 360, cv::Scalar(0, 0, 0), 4, 8, 0);
     }
-    return _frame;
+    return _frameFace;
 }
 
+cv::Mat OpenCV::getRGBFrame(int _chR, int _chG, int _chB)
+{
+    _frameRGB = getFrameColor();
+    cv::Mat _fin_img;
+    cv::Mat chR, chG, chB;
+    std::vector<cv::Mat> channels(3);
+    cv::split(_frameRGB, channels);
+
+    chR = channels[1];
+    chG = channels[1];
+    chB = channels[2];
+
+    chR = chR + _chR;
+    chG = chG + _chG;
+    chB = chB + _chB;
+    cv::merge(channels, _fin_img);
+
+    return _fin_img;
+}

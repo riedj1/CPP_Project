@@ -36,6 +36,8 @@ set(APP_SOURCES
     src/main.cpp
 	src/opencv/opencv.cpp
 	src/opencv/opencv.h
+	src/opencv/framerate.cpp
+	src/opencv/framerate.h
 	src/data/haarcascade_frontalface_alt2.xml
     src/ui/widget.cpp
     src/ui/widget.h

@@ -138,8 +138,11 @@
      <height>160</height>
     </rect>
    </property>
+   <property name="minimum">
+    <number>-256</number>
+   </property>
    <property name="maximum">
-    <number>365</number>
+    <number>256</number>
    </property>
    <property name="orientation">
     <enum>Qt::Vertical</enum>
@@ -154,8 +157,11 @@
      <height>160</height>
     </rect>
    </property>
+   <property name="minimum">
+    <number>-256</number>
+   </property>
    <property name="maximum">
-    <number>365</number>
+    <number>256</number>
    </property>
    <property name="orientation">
     <enum>Qt::Vertical</enum>
@@ -170,8 +176,11 @@
      <height>160</height>
     </rect>
    </property>
+   <property name="minimum">
+    <number>-256</number>
+   </property>
    <property name="maximum">
-    <number>365</number>
+    <number>256</number>
    </property>
    <property name="orientation">
     <enum>Qt::Vertical</enum>

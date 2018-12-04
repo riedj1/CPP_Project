@@ -1,6 +1,7 @@
 #include "widget.h"
 #include "ui_widget.h"
 #include "opencv.h"
+#include "framerate.h"
 
 bool state = true; // initiale state for frame buffer = true
 
@@ -24,6 +25,9 @@ void Widget::on_pushButton_open_Webcam_clicked()
 
     ui->horizontalSlider_CannyEdge->setValue(0);
     ui->horizontalSlider_FaceDetection->setValue(50);
+    ui->verticalSlider_R->setValue(0);
+    ui->verticalSlider_G->setValue(0);
+    ui->verticalSlider_B->setValue(0);
 
     ui->checkBox_CannyEdge->setChecked(false);
     ui->checkBox_FaceDetection->setChecked(false);
@@ -55,6 +59,9 @@ void Widget::on_pushButton_close_Webcam_clicked()
 
     ui->horizontalSlider_CannyEdge->setValue(0);
     ui->horizontalSlider_FaceDetection->setValue(50);
+    ui->verticalSlider_R->setValue(0);
+    ui->verticalSlider_G->setValue(0);
+    ui->verticalSlider_B->setValue(0);
 
     ui->checkBox_CannyEdge->setChecked(false);
     ui->checkBox_FaceDetection->setChecked(false);
@@ -117,6 +124,9 @@ void Widget::on_checkBox_CannyEdge_clicked(bool checked)
              ui->checkBox_RGB_Modifier->setChecked(false);
              ui->checkBox_GOA_Mode->setChecked(false);
              ui->horizontalSlider_FaceDetection->setValue(50);
+             ui->verticalSlider_R->setValue(0);
+             ui->verticalSlider_G->setValue(0);
+             ui->verticalSlider_B->setValue(0);
              disconnect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
              disconnect(timer, SIGNAL(timeout()), this, SLOT(face_detector()));
              disconnect(timer, SIGNAL(timeout()), this, SLOT(goa_mode()));
@@ -168,6 +178,9 @@ void Widget::on_checkBox_FaceDetection_clicked(bool checked)
             ui->checkBox_RGB_Modifier->setChecked(false);
             ui->checkBox_GOA_Mode->setChecked(false);
             ui->horizontalSlider_CannyEdge->setValue(0);
+            ui->verticalSlider_R->setValue(0);
+            ui->verticalSlider_G->setValue(0);
+            ui->verticalSlider_B->setValue(0);
             disconnect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
             disconnect(timer, SIGNAL(timeout()), this, SLOT(canny_edge()));
             disconnect(timer, SIGNAL(timeout()), this, SLOT(goa_mode()));
@@ -187,9 +200,8 @@ void Widget::on_checkBox_FaceDetection_clicked(bool checked)
 // function for face detection
 void Widget::face_detector()
 {
-    frame_w = cl_o.getFrameColor();
     float circle_dia = ui->horizontalSlider_FaceDetection->value();
-    frame_w = cl_o.getFaceFrame(frame_w, circle_dia);
+    frame_w = cl_o.getFaceFrame(circle_dia);
     qt_image = QImage(static_cast<unsigned char*> (frame_w.data), frame_w.cols,
                       frame_w.rows, QImage::Format_RGB888);
     ui->gui_window->setPixmap(QPixmap::fromImage(qt_image));
@@ -242,27 +254,14 @@ void Widget::on_checkBox_RGB_Modifier_clicked(bool checked)
  */
 void Widget::rgb_modifier()
 {
-    frame_w = cl_o.getFrameColor();
+    int chR = ui->verticalSlider_R->value();;
+    int chG = ui->verticalSlider_G->value();
+    int chB = ui->verticalSlider_B->value();
 
-    cv::Mat channel[3];
-    cv::split(frame_w, channel);
+    cv::Mat fin_img = cl_o.getRGBFrame(chR, chG, chB);
 
-    float channel_r = ui->verticalSlider_R->value();
-    float channel_g = ui->verticalSlider_G->value();
-    float channel_b = ui->verticalSlider_B->value();
-
-
-
-//   channel[0] = cv::Mat::zeros(frame_w.rows, frame_w.cols, CV_8UC1);
-//   channel[1] = cv::Mat::zeros(frame_w.rows, frame_w.cols, CV_8UC1);
-//   channel[2] = cv::Mat::zeros(frame_w.rows, frame_w.cols, CV_8UC1);
-
-   std::cout << channel << std::endl;
-
-    cv::merge(channel,1, frame_w);
-
-    qt_image = QImage(static_cast<unsigned char*> (frame_w.data), frame_w.cols,
-                      frame_w.rows, QImage::Format_RGB888);
+    qt_image = QImage(static_cast<unsigned char*> (fin_img.data), fin_img.cols,
+                      fin_img.rows, QImage::Format_RGB888);
     ui->gui_window->setPixmap(QPixmap::fromImage(qt_image));
     ui->gui_window->resize(ui->gui_window->pixmap()->size());
 }
@@ -301,6 +300,9 @@ void Widget::on_checkBox_GOA_Mode_clicked(bool checked)
              ui->checkBox_RGB_Modifier->setChecked(false);
              ui->horizontalSlider_CannyEdge->setValue(0);
              ui->horizontalSlider_FaceDetection->setValue(50);
+             ui->verticalSlider_R->setValue(0);
+             ui->verticalSlider_G->setValue(0);
+             ui->verticalSlider_B->setValue(0);
              disconnect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
              disconnect(timer, SIGNAL(timeout()), this, SLOT(face_detector()));
              disconnect(timer, SIGNAL(timeout()), this, SLOT(canny_edge()));
@@ -321,7 +323,6 @@ void Widget::on_checkBox_GOA_Mode_clicked(bool checked)
 void Widget::goa_mode()
 {
     frame_w = cl_o.getFrameColor();
-
     if(!frame_w.empty())
     {
         qt_image = QImage(static_cast<unsigned char*> (frame_w.data),
@@ -330,4 +331,3 @@ void Widget::goa_mode()
         ui->gui_window->resize(ui->gui_window->pixmap()->size());
     }
 }
-

@@ -19,17 +19,18 @@ static std::deque<cv::Mat> _buffer;
 
 class OpenCV
 {
-    private:
-        int _queue_length = 1000;
-        cv::Mat _output, _output1;
-
-    public:        
+    public:
         cv::VideoCapture startStream();
         void stopStream();
         void frameBuffer(cv::VideoCapture _cap);
         cv::Mat getFrameColor();
         cv::Mat getFrameGray();
-        cv::Mat getFaceFrame(cv::Mat _frame, float circle_dia);
+        cv::Mat getFaceFrame(float circle_dia);
+        cv::Mat getRGBFrame(int chR, int chG, int chB);
+
+    private:
+        int _queue_length = 1000;
+        cv::Mat _output, _output1, _frameFace, _frameRGB;
 
         void add(cv::Mat _frame)
         {
@@ -60,6 +61,5 @@ class OpenCV
         {
             return _buffer.size() == static_cast<unsigned int>(0);
         }
-
 };
 #endif
