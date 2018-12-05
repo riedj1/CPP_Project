@@ -1,9 +1,8 @@
 #include "widget.h"
 #include "ui_widget.h"
 #include "opencv.h"
-#include "framerate.h"
 
-bool state = true; // initiale state for frame buffer = true
+bool state = true; // initiale state for frame buffer
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
@@ -11,14 +10,25 @@ Widget::Widget(QWidget *parent) :
 {
     ui->setupUi(this);
     timer = new QTimer(this);
-}
 
+    this->setWindowTitle("OpenCV Widget");
+    this->setStyleSheet("color: #DDDDDD;"
+                        "background: #191919;");
+
+    ui->pushButton_open_Webcam->setStyleSheet("border: 1px solid #5A5A5A;");
+    ui->pushButton_close_Webcam->setStyleSheet("border: 1px solid #5A5A5A;");
+    ui->gui_window->setStyleSheet("background-color: black;");
+}
 
 Widget::~Widget() {
     delete ui;
 }
 
-// button: start camera stream
+/**
+ * @brief Widget::on_pushButton_open_Webcam_clicked
+ * start camera stream
+ * call thread function to store each frame into the ringbuffer
+ */
 void Widget::on_pushButton_open_Webcam_clicked()
 {
     if (stateThread) start_thread();
@@ -32,15 +42,13 @@ void Widget::on_pushButton_open_Webcam_clicked()
     ui->checkBox_CannyEdge->setChecked(false);
     ui->checkBox_FaceDetection->setChecked(false);
     ui->checkBox_RGB_Modifier->setChecked(false);
-    ui->checkBox_GOA_Mode->setChecked(false);
+    ui->checkBox_FancyMode->setChecked(false);
 
-    if(!cap_w.isOpened())
-    {
+    if(!cap_w.isOpened()){
         std::cout << "camera is not open" << std::endl;
     }
-    else
-    {
-        if (state_NormalStream) {
+    else{
+        if (state_NormalStream){
         std::cout << "camera is open" << std::endl;
         connect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
         timer->start(1);
@@ -48,14 +56,18 @@ void Widget::on_pushButton_open_Webcam_clicked()
     }
 }
 
-// button: stop camera stream
+/**
+ * @brief Widget::on_pushButton_close_Webcam_clicked
+ * close camera stream
+ * kill ringbuffer thread
+ */
 void Widget::on_pushButton_close_Webcam_clicked()
 {
     disconnect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
     disconnect(timer, SIGNAL(timeout()), this, SLOT(canny_edge()));
     disconnect(timer, SIGNAL(timeout()), this, SLOT(face_detector()));
     disconnect(timer, SIGNAL(timeout()), this, SLOT(rgb_modifier()));
-    disconnect(timer, SIGNAL(timeout()), this, SLOT(goa_mode()));
+    disconnect(timer, SIGNAL(timeout()), this, SLOT(fancy_mode()));
 
     ui->horizontalSlider_CannyEdge->setValue(0);
     ui->horizontalSlider_FaceDetection->setValue(50);
@@ -66,11 +78,11 @@ void Widget::on_pushButton_close_Webcam_clicked()
     ui->checkBox_CannyEdge->setChecked(false);
     ui->checkBox_FaceDetection->setChecked(false);
     ui->checkBox_RGB_Modifier->setChecked(false);
-    ui->checkBox_GOA_Mode->setChecked(false);
+    ui->checkBox_FancyMode->setChecked(false);
 
     state = false;
     cap_w.release();
-    if (thread_buffer.joinable()) { thread_buffer.join(); }
+    if(thread_buffer.joinable()){ thread_buffer.join(); }
     cl_o.stopStream();
 
     cv::Mat image = cv::Mat::zeros(frame_w.size(), CV_8UC3);
@@ -83,25 +95,30 @@ void Widget::on_pushButton_close_Webcam_clicked()
     state_NormalStream = true;
 }
 
-// start framebuffer in thread
+/**
+ * @brief Widget::start_thread
+ * start thread function for the ringbuffer
+ */
 void Widget::start_thread()
 {
     state = true;
     cap_w = cl_o.startStream();
     std::thread thread_buffer(&OpenCV::frameBuffer, cl_o, cap_w);
-    if (thread_buffer.joinable()) thread_buffer.detach();
+    if(thread_buffer.joinable()) thread_buffer.detach();
     stateThread = false;
 }
 
-// show frame in window
+/**
+ * @brief Widget::update_window
+ * get color frame from the ringbuffer and show it in widget window
+ */
 void Widget::update_window()
 {
-    if (state_NormalStream) state_NormalStream = false;
+    if(state_NormalStream) state_NormalStream = false;
 
     frame_w = cl_o.getFrameColor();
 
-    if(!frame_w.empty())
-    {
+    if(!frame_w.empty()){
         qt_image = QImage(static_cast<unsigned char*> (frame_w.data),
                           frame_w.cols, frame_w.rows, QImage::Format_RGB888);
         ui->gui_window->setPixmap(QPixmap::fromImage(qt_image));
@@ -109,33 +126,33 @@ void Widget::update_window()
     }
 }
 
-// checkbox: canny edge
+/**
+ * @brief Widget::on_checkBox_CannyEdge_clicked
+ * @param checked:  true: calls canny_edge funtion
+ *                  false: gets color frame to the widget window
+ */
 void Widget::on_checkBox_CannyEdge_clicked(bool checked)
 {
-    if(!cap_w.isOpened())
-     {
+    if(!cap_w.isOpened()){
          ui->checkBox_CannyEdge->setChecked(false);
      }
-     else
-     {
-         if(checked)
-         {
+     else{
+         if(checked){
              ui->checkBox_FaceDetection->setChecked(false);
              ui->checkBox_RGB_Modifier->setChecked(false);
-             ui->checkBox_GOA_Mode->setChecked(false);
+             ui->checkBox_FancyMode->setChecked(false);
              ui->horizontalSlider_FaceDetection->setValue(50);
              ui->verticalSlider_R->setValue(0);
              ui->verticalSlider_G->setValue(0);
              ui->verticalSlider_B->setValue(0);
              disconnect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
              disconnect(timer, SIGNAL(timeout()), this, SLOT(face_detector()));
-             disconnect(timer, SIGNAL(timeout()), this, SLOT(goa_mode()));
+             disconnect(timer, SIGNAL(timeout()), this, SLOT(fancy_mode()));
              disconnect(timer, SIGNAL(timeout()), this, SLOT(rgb_modifier()));
              connect(timer, SIGNAL(timeout()), this, SLOT(canny_edge()));
              timer->start(1);
          }
-         else
-         {
+         else{
              disconnect(timer, SIGNAL(timeout()), this, SLOT(canny_edge()));
              connect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
              timer->start(1);
@@ -143,7 +160,11 @@ void Widget::on_checkBox_CannyEdge_clicked(bool checked)
      }
 }
 
-// show: canny edge in window
+/**
+ * @brief Widget::canny_edge
+ * gets frame from the ringbuffer
+ * applies canny edge detection and shows it in widget window
+ */
 void Widget::canny_edge()
 {
     frame_w = cl_o.getFrameGray();
@@ -157,39 +178,43 @@ void Widget::canny_edge()
     ui->gui_window->resize(ui->gui_window->pixmap()->size());
 }
 
-// get state of slider for canny edge threshhold
+/**
+ * @brief Widget::on_horizontalSlider_CannyEdge_valueChanged
+ * adjust the gradient threshold for the canny edge function
+ * moving to the rightside -> bigger value -> shows only strong gradients
+ */
 void Widget::on_horizontalSlider_CannyEdge_valueChanged()
 {
     slider = new QSlider(Qt::Horizontal);
 }
 
-// checkbox: face detection
+/**
+ * @brief Widget::on_checkBox_FaceDetection_clicked
+ * @param checked:  true: calls face_detection funtion
+ *                  false: gets color frame to the widget window
+ */
 void Widget::on_checkBox_FaceDetection_clicked(bool checked)
 {
-    if(!cap_w.isOpened())
-    {
+    if(!cap_w.isOpened()){
         ui->checkBox_FaceDetection->setChecked(false);
     }
-    else
-    {
-        if(checked)
-        {
+    else{
+        if(checked){
             ui->checkBox_CannyEdge->setChecked(false);
             ui->checkBox_RGB_Modifier->setChecked(false);
-            ui->checkBox_GOA_Mode->setChecked(false);
+            ui->checkBox_FancyMode->setChecked(false);
             ui->horizontalSlider_CannyEdge->setValue(0);
             ui->verticalSlider_R->setValue(0);
             ui->verticalSlider_G->setValue(0);
             ui->verticalSlider_B->setValue(0);
             disconnect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
             disconnect(timer, SIGNAL(timeout()), this, SLOT(canny_edge()));
-            disconnect(timer, SIGNAL(timeout()), this, SLOT(goa_mode()));
+            disconnect(timer, SIGNAL(timeout()), this, SLOT(fancy_mode()));
             disconnect(timer, SIGNAL(timeout()), this, SLOT(rgb_modifier()));
             connect(timer, SIGNAL(timeout()), this, SLOT(face_detector()));
             timer->start(1);
         }
-        else
-        {
+        else{
             disconnect(timer, SIGNAL(timeout()), this, SLOT(face_detector()));
             connect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
             timer->start(1);
@@ -197,7 +222,11 @@ void Widget::on_checkBox_FaceDetection_clicked(bool checked)
     }
 }
 
-// function for face detection
+/**
+ * @brief Widget::face_detector
+ * gets frame from the ringbuffer
+ * applies face detection and shows it in widget window
+ */
 void Widget::face_detector()
 {
     float circle_dia = ui->horizontalSlider_FaceDetection->value();
@@ -208,7 +237,10 @@ void Widget::face_detector()
     ui->gui_window->resize(ui->gui_window->pixmap()->size());
 }
 
-// get state of slider for face detection circle diameter
+/**
+ * @brief Widget::on_horizontalSlider_FaceDetection_valueChanged
+ * adjust size of the detection circle
+ */
 void Widget::on_horizontalSlider_FaceDetection_valueChanged()
 {
     slider = new QSlider(Qt::Horizontal);
@@ -216,32 +248,29 @@ void Widget::on_horizontalSlider_FaceDetection_valueChanged()
 
 /**
  * @brief Widget::on_checkBox_RGB_Modifier_clicked
- * @param checked
+ * @param checked   true: calls rgb_modifying funtion
+ *                  false: gets color frame to the widget window
  */
 void Widget::on_checkBox_RGB_Modifier_clicked(bool checked)
 {
-    if(!cap_w.isOpened())
-    {
+    if(!cap_w.isOpened()){
         ui->checkBox_RGB_Modifier->setChecked(false);
     }
-    else
-     {
-        if(checked)
-        {
+    else{
+        if(checked){
              ui->checkBox_CannyEdge->setChecked(false);
              ui->checkBox_FaceDetection->setChecked(false);
-             ui->checkBox_GOA_Mode->setChecked(false);
+             ui->checkBox_FancyMode->setChecked(false);
              ui->horizontalSlider_CannyEdge->setValue(0);
              ui->horizontalSlider_FaceDetection->setValue(50);
-             disconnect(timer, SIGNAL(timeout()), this, SLOT(goa_mode()));
+             disconnect(timer, SIGNAL(timeout()), this, SLOT(fancy_mode()));
              disconnect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
              disconnect(timer, SIGNAL(timeout()), this, SLOT(face_detector()));
              disconnect(timer, SIGNAL(timeout()), this, SLOT(canny_edge()));
              connect(timer, SIGNAL(timeout()), this, SLOT(rgb_modifier()));
              timer->start(1);
          }
-         else
-         {
+         else{
              disconnect(timer, SIGNAL(timeout()), this, SLOT(rgb_modifier()));
              connect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
              timer->start(1);
@@ -251,6 +280,8 @@ void Widget::on_checkBox_RGB_Modifier_clicked(bool checked)
 
 /**
  * @brief Widget::rgb_modifier
+ * gets frame from the ringbuffer
+ * applies rgb changes and shows it in widget window
  */
 void Widget::rgb_modifier()
 {
@@ -266,35 +297,45 @@ void Widget::rgb_modifier()
     ui->gui_window->resize(ui->gui_window->pixmap()->size());
 }
 
-// slider: adjust color R
+/**
+ * @brief Widget::on_verticalSlider_R_valueChanged
+ * change r values between -256 & 256
+ */
 void Widget::on_verticalSlider_R_valueChanged()
 {
     slider = new QSlider(Qt::Vertical);
 }
 
-// slider: adjust color G
+/**
+ * @brief Widget::on_verticalSlider_G_valueChanged
+ * change g values between -256 & 256
+ */
 void Widget::on_verticalSlider_G_valueChanged()
 {
     slider = new QSlider(Qt::Vertical);
 }
 
-// slider: adjust color B
+/**
+ * @brief Widget::on_verticalSlider_B_valueChanged
+ * change b values between -256 & 256
+ */
 void Widget::on_verticalSlider_B_valueChanged()
 {
     slider = new QSlider(Qt::Vertical);
 }
 
-// not done yet
-void Widget::on_checkBox_GOA_Mode_clicked(bool checked)
+/**
+ * @brief Widget::on_checkBox_FancyMode_clicked
+ * @param checked:  true: calls fancy mode funtion
+ *                  false: gets color frame to the widget window
+ */
+void Widget::on_checkBox_FancyMode_clicked(bool checked)
 {
-    if(!cap_w.isOpened())
-     {
-         ui->checkBox_GOA_Mode->setChecked(false);
+    if(!cap_w.isOpened()){
+         ui->checkBox_FancyMode->setChecked(false);
      }
-     else
-     {
-         if(checked)
-         {
+     else{
+         if(checked){
              ui->checkBox_CannyEdge->setChecked(false);
              ui->checkBox_FaceDetection->setChecked(false);
              ui->checkBox_RGB_Modifier->setChecked(false);
@@ -307,20 +348,22 @@ void Widget::on_checkBox_GOA_Mode_clicked(bool checked)
              disconnect(timer, SIGNAL(timeout()), this, SLOT(face_detector()));
              disconnect(timer, SIGNAL(timeout()), this, SLOT(canny_edge()));
              disconnect(timer, SIGNAL(timeout()), this, SLOT(rgb_modifier()));
-             connect(timer, SIGNAL(timeout()), this, SLOT(goa_mode()));
+             connect(timer, SIGNAL(timeout()), this, SLOT(fancy_mode()));
              timer->start(1);
          }
-         else
-         {
-             disconnect(timer, SIGNAL(timeout()), this, SLOT(goa_mode()));
+         else{
+             disconnect(timer, SIGNAL(timeout()), this, SLOT(fancy_mode()));
              connect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
              timer->start(1);
          }
     }
 }
 
-// show frame in goa mode
-void Widget::goa_mode()
+/**
+ * @brief Widget::fancy_mode
+ * gets frame from the ringbuffer and converts it to color format_RGB666
+ */
+void Widget::fancy_mode()
 {
     frame_w = cl_o.getFrameColor();
     if(!frame_w.empty())
@@ -331,3 +374,4 @@ void Widget::goa_mode()
         ui->gui_window->resize(ui->gui_window->pixmap()->size());
     }
 }
+

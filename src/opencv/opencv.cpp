@@ -1,24 +1,30 @@
 #include "opencv.h"
 #include "widget.h"
-#include "framerate.h"
 
 #include <thread>
 #include <chrono>
 #include <vector>
 
-extern bool state; // for manage while state in frameBuffer
+extern bool state; // for managing the while loop of the frame buffer thread
 
-// start video camera
+/**
+ * @brief OpenCV::startStream
+ * @return:     the capture stream of the video camera
+ *              if stream is already opened, nothing happens
+ */
 cv::VideoCapture OpenCV::startStream()
 {
     cv::VideoCapture _cap;
     _cap.open(0);
     if(!_cap.isOpened()){ std::cout << "Camera is not open" << std::endl; }
-    else { return _cap; };
+    else{ return _cap; };
     return 0;
 }
 
-// stop vidoe camera
+/**
+ * @brief OpenCV::stopStream
+ * stop camera stream
+ */
 void OpenCV::stopStream()
 {
     cv::VideoCapture _cap;
@@ -26,32 +32,48 @@ void OpenCV::stopStream()
     if(!_cap.isOpened()){ std::cout << "Camera is closed" << std::endl; }
 }
 
-// store camera frame in ringbuffer
+/**
+ * @brief OpenCV::frameBuffer
+ * @param _cap:     gets stream of the camera
+ * mangaged by detached thread to push catched frames to the ringbuffer
+ */
 void OpenCV::frameBuffer(cv::VideoCapture _cap)
 {
-    while(state) {
+    while(state){
         _cap >> _frame;
         if(!_frame.empty()){ add(_frame); }
     }
 }
 
-// get color frame of ringbuffer
+/**
+ * @brief OpenCV::getFrameColor
+ * @return:     colored and resized frame, grabed from the ringbuffer
+ */
 cv::Mat OpenCV::getFrameColor()
 {
     _output = get();
     cv::cvtColor(_output, _output1, CV_BGR2RGB);
+    cv::resize(_output1, _output1, cv::Size(800,600));
     return _output1;
 }
 
-// get gray frame of ringbuffer
+/**
+ * @brief OpenCV::getFrameGray
+ * @return:      gray colored and resized frame, grabed from the ringbuffer
+ */
 cv::Mat OpenCV::getFrameGray()
 {
     _output = get();
     cv::cvtColor(_output, _output1, CV_BGR2GRAY);
+    cv::resize(_output1, _output1, cv::Size(800,600));
     return _output1;
 }
 
-// face detection on frame from ring buffer
+/**
+ * @brief OpenCV::getFaceFrame
+ * @param circle_dia:   input value from the face detection slider
+ * @return      colored face with the applied circle of the face detection
+ */
 cv::Mat OpenCV::getFaceFrame(float circle_dia)
 {
     _frameFace = getFrameColor();
@@ -68,8 +90,7 @@ cv::Mat OpenCV::getFaceFrame(float circle_dia)
                                   cv::Size(120, 120));
 
     // Show the results
-    for(uint i = 0; i < static_cast<uint>(faces.size()); i++)
-    {
+    for(uint i = 0; i < static_cast<uint>(faces.size()); i++){
         cv::Point center(static_cast<int>(faces[i].x) +
                          static_cast<int>(faces[i].width*0.5),
                          static_cast<int>(faces[i].y + faces[i].height*0.5));
@@ -82,6 +103,13 @@ cv::Mat OpenCV::getFaceFrame(float circle_dia)
     return _frameFace;
 }
 
+/**
+ * @brief OpenCV::getRGBFrame
+ * @param _chR:     value of the slider R
+ * @param _chG:     value of the slider G
+ * @param _chB:     value of the slider B
+ * @return      frame with the modified RGB values depending on the slider pos.
+ */
 cv::Mat OpenCV::getRGBFrame(int _chR, int _chG, int _chB)
 {
     _frameRGB = getFrameColor();

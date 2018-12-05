@@ -29,40 +29,41 @@ find_package(Qt5PrintSupport REQUIRED)
 find_package(Qt5Core)
 find_package(OpenCV REQUIRED)
 
-include_directories(${OpenCV_INCLUDE_DIRS})
+
 
 # Populate a CMake variable with the sources
 set(APP_SOURCES
     src/main.cpp
 	src/opencv/opencv.cpp
 	src/opencv/opencv.h
-	src/opencv/framerate.cpp
-	src/opencv/framerate.h
 	src/data/haarcascade_frontalface_alt2.xml
     src/ui/widget.cpp
     src/ui/widget.h
     src/ui/widget.ui
+	src/style/Style.qss
 )
 
 set(APP_INCLUDE_DIRS
     src
     src/data
-    src/ui
+	src/ui
 	src/opencv
+	src/style
 )
 
+include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${APP_INCLUDE_DIRS})
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/src/data/haarcascade_frontalface_alt2.xml
 	DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/src/style/Style.qss
+	DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 # Add an executable to the project and sources
 add_executable(${PROJECT_NAME} ${APP_SOURCES})
-
 
 # Use the Widgets module from Qt 5
 target_link_libraries (${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} )
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::PrintSupport)
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} )
-
-

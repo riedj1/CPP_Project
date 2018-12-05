@@ -29,6 +29,10 @@ class Widget : public QWidget
 {
     Q_OBJECT
 
+    public:
+        explicit Widget(QWidget *parent = nullptr);
+        ~Widget();
+
     private:
         Ui::Widget *ui;
         cv::VideoCapture cap_w;
@@ -40,10 +44,6 @@ class Widget : public QWidget
         bool state_NormalStream = true;
         std::thread thread_buffer;
         OpenCV cl_o;
-
-    public:
-        explicit Widget(QWidget *parent = nullptr);
-        ~Widget();
 
     private slots:
         void on_pushButton_open_Webcam_clicked();
@@ -61,9 +61,8 @@ class Widget : public QWidget
         void on_verticalSlider_G_valueChanged();
         void on_verticalSlider_B_valueChanged();
         void rgb_modifier();
-        void on_checkBox_GOA_Mode_clicked(bool checked);
-        void goa_mode();
+        void on_checkBox_FancyMode_clicked(bool checked);
+        void fancy_mode();
 };
-
 
 #endif // WIDGET_H
