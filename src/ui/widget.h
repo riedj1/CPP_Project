@@ -63,6 +63,8 @@ class Widget : public QWidget
         void rgb_modifier();
         void on_checkBox_FancyMode_clicked(bool checked);
         void fancy_mode();
+        void closeEvent(QCloseEvent *event);
+
 };
 
 #endif // WIDGET_H

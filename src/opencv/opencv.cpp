@@ -18,7 +18,6 @@ cv::VideoCapture OpenCV::startStream()
     cap.open(0);
     if(!cap.isOpened()){ std::cout << "Camera is not open" << std::endl; }
     else{ return cap; };
-    return 0;
 }
 
 /**
@@ -118,7 +117,7 @@ cv::Mat OpenCV::getRGBFrame(int _chR, int _chG, int _chB)
     std::vector<cv::Mat> channels(3);
     cv::split(output, channels);
 
-    chR = channels[1];
+    chR = channels[0];
     chG = channels[1];
     chB = channels[2];
 

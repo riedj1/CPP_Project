@@ -24,6 +24,8 @@ Widget::~Widget() {
     delete ui;
 }
 
+
+
 /**
  * @brief Widget::on_pushButton_open_Webcam_clicked
  * start camera stream
@@ -375,3 +377,14 @@ void Widget::fancy_mode()
     }
 }
 
+/**
+ * @brief Widget::closeEvent
+ * @param event:    closes camera stream and kills thread by pressing 'X'
+ */
+void Widget::closeEvent(QCloseEvent *event)
+{
+    state = false;
+    cl_o.stopStream();
+    cap_w.release();
+    if(thread_buffer.joinable()){ thread_buffer.join(); }
+}

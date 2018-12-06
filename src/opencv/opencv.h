@@ -23,10 +23,6 @@ class OpenCV
         cv::VideoCapture startStream();
         void stopStream();
         void frameBuffer(cv::VideoCapture _cap);
-        void startFrameRate();
-        void endFrameRate();
-        void countFrameRate(bool start);
-        float getFrameRate();
         cv::Mat getFrameColor();
         cv::Mat getFrameGray();
         cv::Mat getFaceFrame(float circle_dia);
