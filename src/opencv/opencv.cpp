@@ -14,10 +14,10 @@ extern bool state; // for managing the while loop of the frame buffer thread
  */
 cv::VideoCapture OpenCV::startStream()
 {
-    cv::VideoCapture _cap;
-    _cap.open(0);
-    if(!_cap.isOpened()){ std::cout << "Camera is not open" << std::endl; }
-    else{ return _cap; };
+    cv::VideoCapture cap;
+    cap.open(0);
+    if(!cap.isOpened()){ std::cout << "Camera is not open" << std::endl; }
+    else{ return cap; };
     return 0;
 }
 
@@ -27,9 +27,9 @@ cv::VideoCapture OpenCV::startStream()
  */
 void OpenCV::stopStream()
 {
-    cv::VideoCapture _cap;
-    _cap.release();
-    if(!_cap.isOpened()){ std::cout << "Camera is closed" << std::endl; }
+    cv::VideoCapture cap;
+    cap.release();
+    if(!cap.isOpened()){ std::cout << "Camera is closed" << std::endl; }
 }
 
 /**
@@ -37,11 +37,11 @@ void OpenCV::stopStream()
  * @param _cap:     gets stream of the camera
  * mangaged by detached thread to push catched frames to the ringbuffer
  */
-void OpenCV::frameBuffer(cv::VideoCapture _cap)
+void OpenCV::frameBuffer(cv::VideoCapture cap)
 {
     while(state){
-        _cap >> _frame;
-        if(!_frame.empty()){ add(_frame); }
+        cap >> frame;
+        if(!frame.empty()){ add(frame); }
     }
 }
 
@@ -51,10 +51,10 @@ void OpenCV::frameBuffer(cv::VideoCapture _cap)
  */
 cv::Mat OpenCV::getFrameColor()
 {
-    _output = get();
-    cv::cvtColor(_output, _output1, CV_BGR2RGB);
-    cv::resize(_output1, _output1, cv::Size(800,600));
-    return _output1;
+    cv::Mat output = get();
+    cv::cvtColor(output, output, CV_BGR2RGB);
+    cv::resize(output, output, cv::Size(800,600));
+    return output;
 }
 
 /**
@@ -63,10 +63,10 @@ cv::Mat OpenCV::getFrameColor()
  */
 cv::Mat OpenCV::getFrameGray()
 {
-    _output = get();
-    cv::cvtColor(_output, _output1, CV_BGR2GRAY);
-    cv::resize(_output1, _output1, cv::Size(800,600));
-    return _output1;
+    cv::Mat output = get();
+    cv::cvtColor(output, output, CV_BGR2GRAY);
+    cv::resize(output, output, cv::Size(800,600));
+    return output;
 }
 
 /**
@@ -76,7 +76,7 @@ cv::Mat OpenCV::getFrameGray()
  */
 cv::Mat OpenCV::getFaceFrame(float circle_dia)
 {
-    _frameFace = getFrameColor();
+    cv::Mat output = getFrameColor();
     circle_dia = circle_dia / 100;
     // Initialize the inbuilt Harr Cascade frontal face detection
     cv::CascadeClassifier face_cascade;
@@ -86,7 +86,7 @@ cv::Mat OpenCV::getFaceFrame(float circle_dia)
     std::vector<cv::Rect> faces;
 
     // Detect faces
-    face_cascade.detectMultiScale(_frameFace, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE,
+    face_cascade.detectMultiScale(output, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE,
                                   cv::Size(120, 120));
 
     // Show the results
@@ -95,12 +95,12 @@ cv::Mat OpenCV::getFaceFrame(float circle_dia)
                          static_cast<int>(faces[i].width*0.5),
                          static_cast<int>(faces[i].y + faces[i].height*0.5));
 
-        ellipse(_frameFace, center,
+        ellipse(output, center,
                 cv::Size(static_cast<int>(faces[i].width*circle_dia),
                          static_cast<int>(faces[i].height*circle_dia)),
                          0, 0, 360, cv::Scalar(0, 0, 0), 4, 8, 0);
     }
-    return _frameFace;
+    return output;
 }
 
 /**
@@ -112,11 +112,11 @@ cv::Mat OpenCV::getFaceFrame(float circle_dia)
  */
 cv::Mat OpenCV::getRGBFrame(int _chR, int _chG, int _chB)
 {
-    _frameRGB = getFrameColor();
-    cv::Mat _fin_img;
+    cv::Mat output = getFrameColor();
+    cv::Mat fin_img;
     cv::Mat chR, chG, chB;
     std::vector<cv::Mat> channels(3);
-    cv::split(_frameRGB, channels);
+    cv::split(output, channels);
 
     chR = channels[1];
     chG = channels[1];
@@ -125,7 +125,7 @@ cv::Mat OpenCV::getRGBFrame(int _chR, int _chG, int _chB)
     chR = chR + _chR;
     chG = chG + _chG;
     chB = chB + _chB;
-    cv::merge(channels, _fin_img);
+    cv::merge(channels, fin_img);
 
-    return _fin_img;
+    return fin_img;
 }

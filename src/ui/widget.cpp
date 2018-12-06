@@ -31,7 +31,7 @@ Widget::~Widget() {
  */
 void Widget::on_pushButton_open_Webcam_clicked()
 {
-    if (stateThread) start_thread();
+    if(stateThread) start_thread();
 
     ui->horizontalSlider_CannyEdge->setValue(0);
     ui->horizontalSlider_FaceDetection->setValue(50);
@@ -48,7 +48,7 @@ void Widget::on_pushButton_open_Webcam_clicked()
         std::cout << "camera is not open" << std::endl;
     }
     else{
-        if (state_NormalStream){
+        if (stateStream){
         std::cout << "camera is open" << std::endl;
         connect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
         timer->start(1);
@@ -92,7 +92,7 @@ void Widget::on_pushButton_close_Webcam_clicked()
     ui->gui_window->resize(ui->gui_window->pixmap()->size());
 
     stateThread = true;
-    state_NormalStream = true;
+    stateStream = true;
 }
 
 /**
@@ -114,7 +114,7 @@ void Widget::start_thread()
  */
 void Widget::update_window()
 {
-    if(state_NormalStream) state_NormalStream = false;
+    if(stateStream) stateStream = false;
 
     frame_w = cl_o.getFrameColor();
 

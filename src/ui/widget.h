@@ -41,7 +41,7 @@ class Widget : public QWidget
         QTimer *timer;
         QImage qt_image;
         bool stateThread = true;
-        bool state_NormalStream = true;
+        bool stateStream = true;
         std::thread thread_buffer;
         OpenCV cl_o;
 

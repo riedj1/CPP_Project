@@ -40,7 +40,6 @@ set(APP_SOURCES
     src/ui/widget.cpp
     src/ui/widget.h
     src/ui/widget.ui
-	src/style/Style.qss
 )
 
 set(APP_INCLUDE_DIRS
@@ -48,16 +47,12 @@ set(APP_INCLUDE_DIRS
     src/data
 	src/ui
 	src/opencv
-	src/style
 )
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${APP_INCLUDE_DIRS})
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/src/data/haarcascade_frontalface_alt2.xml
-	DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/src/style/Style.qss
 	DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # Add an executable to the project and sources
