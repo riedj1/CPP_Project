@@ -13,9 +13,9 @@
 #include <condition_variable>
 
 static std::mutex mu;
-static std::condition_variable _cv_buffer;
-static cv::Mat _frame;
-static std::deque<cv::Mat> _buffer;
+static std::condition_variable cv_buffer;
+static cv::Mat frame;
+static std::deque<cv::Mat> buffer;
 
 class OpenCV
 {
@@ -34,39 +34,52 @@ class OpenCV
 
     private:
         int _queue_length = 1000;
-        cv::Mat _output, _output1, _frameFace, _frameRGB;
-        int frame_count = 0;
-        float frame_rate;
 
-
+        /**
+         * @brief add
+         * @param _frame:   frame from the camera stream
+         * function add singel frames to the ringbuffer, mutex protected
+         */
         void add(cv::Mat _frame)
         {
             std::unique_lock<std::mutex> buff_lock(mu);
-            _cv_buffer.wait(buff_lock, [this]{ return !isFull(); });
-            _buffer.push_front(_frame);
+            cv_buffer.wait(buff_lock, [this]{ return !isFull(); });
+            buffer.push_front(_frame);
             buff_lock.unlock();
-            _cv_buffer.notify_one();
+            cv_buffer.notify_one();
         }
 
+        /**
+         * @brief get
+         * @return:     single frame from the ringbuffer
+         */
         cv::Mat get()
         {
             std::unique_lock<std::mutex> buff_lock(mu);
-            _cv_buffer.wait(buff_lock, [this]{ return !isEmpty(); });
-            cv::Mat request = _buffer.back();
-            _buffer.pop_back();
+            cv_buffer.wait(buff_lock, [this]{ return !isEmpty(); });
+            cv::Mat request = buffer.back();
+            buffer.pop_back();
             buff_lock.unlock();
-            _cv_buffer.notify_one();
+            cv_buffer.notify_one();
             return request;
         }
 
+        /**
+         * @brief isFull
+         * @return:     check if ringbuffer is full
+         */
         bool isFull() const
         {
-           return _buffer.size() >= static_cast<unsigned int>(_queue_length);
+           return buffer.size() >= static_cast<unsigned int>(_queue_length);
         }
 
+        /**
+         * @brief isEmpty
+         * @return:     check if reingbuffer is empty
+         */
         bool isEmpty() const
         {
-            return _buffer.size() == static_cast<unsigned int>(0);
+            return buffer.size() == static_cast<unsigned int>(0);
         }
 };
 #endif
