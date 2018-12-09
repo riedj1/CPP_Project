@@ -11,6 +11,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 ")
 # Note: warnings are compiler specific
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
+# may be needed
+SET(OpenCV_DIR /home/dev/installation/OpenCV-master/lib/cmake/opencv4)
 
 # set build type to Debug/Release
 set(CMAKE_BUILD_TYPE "Debug")

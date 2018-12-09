@@ -2,6 +2,7 @@
 #include "ui_widget.h"
 #include "opencv.h"
 
+
 bool state = true; // initiale state for frame buffer
 
 Widget::Widget(QWidget *parent) :
@@ -14,7 +15,7 @@ Widget::Widget(QWidget *parent) :
     this->setWindowTitle("OpenCV Widget");
     this->setStyleSheet("color: #DDDDDD;"
                         "background: #191919;");
-
+    //BUG widget is not scalable, set fixed size or make video frame area scalable
     ui->pushButton_open_Webcam->setStyleSheet("border: 1px solid #5A5A5A;");
     ui->pushButton_close_Webcam->setStyleSheet("border: 1px solid #5A5A5A;");
     ui->gui_window->setStyleSheet("background-color: black;");
@@ -51,9 +52,9 @@ void Widget::on_pushButton_open_Webcam_clicked()
     }
     else{
         if (stateStream){
-        std::cout << "camera is open" << std::endl;
-        connect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
-        timer->start(1);
+            std::cout << "camera is open" << std::endl;
+            connect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
+            timer->start(1);
         }
     }
 }
@@ -82,9 +83,12 @@ void Widget::on_pushButton_close_Webcam_clicked()
     ui->checkBox_RGB_Modifier->setChecked(false);
     ui->checkBox_FancyMode->setChecked(false);
 
+    //TODO better make a function in the opencv class like stopBuffer() which you can call to break the while loop (requires while condition to be a local member variable like m_state)
     state = false;
     cap_w.release();
-    if(thread_buffer.joinable()){ thread_buffer.join(); }
+    //FIXME use them multilines
+    if(thread_buffer.joinable()){
+        thread_buffer.join(); }
     cl_o.stopStream();
 
     cv::Mat image = cv::Mat::zeros(frame_w.size(), CV_8UC3);
@@ -106,6 +110,8 @@ void Widget::start_thread()
     state = true;
     cap_w = cl_o.startStream();
     std::thread thread_buffer(&OpenCV::frameBuffer, cl_o, cap_w);
+
+    //FIXME why would you check for joinablility but then detach?
     if(thread_buffer.joinable()) thread_buffer.detach();
     stateThread = false;
 }
@@ -116,6 +122,7 @@ void Widget::start_thread()
  */
 void Widget::update_window()
 {
+    //FIXME use {} with if statements
     if(stateStream) stateStream = false;
 
     frame_w = cl_o.getFrameColor();
@@ -136,30 +143,30 @@ void Widget::update_window()
 void Widget::on_checkBox_CannyEdge_clicked(bool checked)
 {
     if(!cap_w.isOpened()){
-         ui->checkBox_CannyEdge->setChecked(false);
-     }
-     else{
-         if(checked){
-             ui->checkBox_FaceDetection->setChecked(false);
-             ui->checkBox_RGB_Modifier->setChecked(false);
-             ui->checkBox_FancyMode->setChecked(false);
-             ui->horizontalSlider_FaceDetection->setValue(50);
-             ui->verticalSlider_R->setValue(0);
-             ui->verticalSlider_G->setValue(0);
-             ui->verticalSlider_B->setValue(0);
-             disconnect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
-             disconnect(timer, SIGNAL(timeout()), this, SLOT(face_detector()));
-             disconnect(timer, SIGNAL(timeout()), this, SLOT(fancy_mode()));
-             disconnect(timer, SIGNAL(timeout()), this, SLOT(rgb_modifier()));
-             connect(timer, SIGNAL(timeout()), this, SLOT(canny_edge()));
-             timer->start(1);
-         }
-         else{
-             disconnect(timer, SIGNAL(timeout()), this, SLOT(canny_edge()));
-             connect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
-             timer->start(1);
-         }
-     }
+        ui->checkBox_CannyEdge->setChecked(false);
+    }
+    else{
+        if(checked){
+            ui->checkBox_FaceDetection->setChecked(false);
+            ui->checkBox_RGB_Modifier->setChecked(false);
+            ui->checkBox_FancyMode->setChecked(false);
+            ui->horizontalSlider_FaceDetection->setValue(50);
+            ui->verticalSlider_R->setValue(0);
+            ui->verticalSlider_G->setValue(0);
+            ui->verticalSlider_B->setValue(0);
+            disconnect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
+            disconnect(timer, SIGNAL(timeout()), this, SLOT(face_detector()));
+            disconnect(timer, SIGNAL(timeout()), this, SLOT(fancy_mode()));
+            disconnect(timer, SIGNAL(timeout()), this, SLOT(rgb_modifier()));
+            connect(timer, SIGNAL(timeout()), this, SLOT(canny_edge()));
+            timer->start(1);
+        }
+        else{
+            disconnect(timer, SIGNAL(timeout()), this, SLOT(canny_edge()));
+            connect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
+            timer->start(1);
+        }
+    }
 }
 
 /**
@@ -187,6 +194,7 @@ void Widget::canny_edge()
  */
 void Widget::on_horizontalSlider_CannyEdge_valueChanged()
 {
+    //NOTE why u do this?
     slider = new QSlider(Qt::Horizontal);
 }
 
@@ -245,6 +253,7 @@ void Widget::face_detector()
  */
 void Widget::on_horizontalSlider_FaceDetection_valueChanged()
 {
+    //NOTE why u do this?
     slider = new QSlider(Qt::Horizontal);
 }
 
@@ -260,23 +269,23 @@ void Widget::on_checkBox_RGB_Modifier_clicked(bool checked)
     }
     else{
         if(checked){
-             ui->checkBox_CannyEdge->setChecked(false);
-             ui->checkBox_FaceDetection->setChecked(false);
-             ui->checkBox_FancyMode->setChecked(false);
-             ui->horizontalSlider_CannyEdge->setValue(0);
-             ui->horizontalSlider_FaceDetection->setValue(50);
-             disconnect(timer, SIGNAL(timeout()), this, SLOT(fancy_mode()));
-             disconnect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
-             disconnect(timer, SIGNAL(timeout()), this, SLOT(face_detector()));
-             disconnect(timer, SIGNAL(timeout()), this, SLOT(canny_edge()));
-             connect(timer, SIGNAL(timeout()), this, SLOT(rgb_modifier()));
-             timer->start(1);
-         }
-         else{
-             disconnect(timer, SIGNAL(timeout()), this, SLOT(rgb_modifier()));
-             connect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
-             timer->start(1);
-         }
+            ui->checkBox_CannyEdge->setChecked(false);
+            ui->checkBox_FaceDetection->setChecked(false);
+            ui->checkBox_FancyMode->setChecked(false);
+            ui->horizontalSlider_CannyEdge->setValue(0);
+            ui->horizontalSlider_FaceDetection->setValue(50);
+            disconnect(timer, SIGNAL(timeout()), this, SLOT(fancy_mode()));
+            disconnect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
+            disconnect(timer, SIGNAL(timeout()), this, SLOT(face_detector()));
+            disconnect(timer, SIGNAL(timeout()), this, SLOT(canny_edge()));
+            connect(timer, SIGNAL(timeout()), this, SLOT(rgb_modifier()));
+            timer->start(1);
+        }
+        else{
+            disconnect(timer, SIGNAL(timeout()), this, SLOT(rgb_modifier()));
+            connect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
+            timer->start(1);
+        }
     }
 }
 
@@ -305,6 +314,7 @@ void Widget::rgb_modifier()
  */
 void Widget::on_verticalSlider_R_valueChanged()
 {
+    //NOTE why u do this?
     slider = new QSlider(Qt::Vertical);
 }
 
@@ -314,6 +324,7 @@ void Widget::on_verticalSlider_R_valueChanged()
  */
 void Widget::on_verticalSlider_G_valueChanged()
 {
+    //NOTE why u do this?
     slider = new QSlider(Qt::Vertical);
 }
 
@@ -323,6 +334,7 @@ void Widget::on_verticalSlider_G_valueChanged()
  */
 void Widget::on_verticalSlider_B_valueChanged()
 {
+    //NOTE why u do this?
     slider = new QSlider(Qt::Vertical);
 }
 
@@ -334,30 +346,30 @@ void Widget::on_verticalSlider_B_valueChanged()
 void Widget::on_checkBox_FancyMode_clicked(bool checked)
 {
     if(!cap_w.isOpened()){
-         ui->checkBox_FancyMode->setChecked(false);
-     }
-     else{
-         if(checked){
-             ui->checkBox_CannyEdge->setChecked(false);
-             ui->checkBox_FaceDetection->setChecked(false);
-             ui->checkBox_RGB_Modifier->setChecked(false);
-             ui->horizontalSlider_CannyEdge->setValue(0);
-             ui->horizontalSlider_FaceDetection->setValue(50);
-             ui->verticalSlider_R->setValue(0);
-             ui->verticalSlider_G->setValue(0);
-             ui->verticalSlider_B->setValue(0);
-             disconnect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
-             disconnect(timer, SIGNAL(timeout()), this, SLOT(face_detector()));
-             disconnect(timer, SIGNAL(timeout()), this, SLOT(canny_edge()));
-             disconnect(timer, SIGNAL(timeout()), this, SLOT(rgb_modifier()));
-             connect(timer, SIGNAL(timeout()), this, SLOT(fancy_mode()));
-             timer->start(1);
-         }
-         else{
-             disconnect(timer, SIGNAL(timeout()), this, SLOT(fancy_mode()));
-             connect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
-             timer->start(1);
-         }
+        ui->checkBox_FancyMode->setChecked(false);
+    }
+    else{
+        if(checked){
+            ui->checkBox_CannyEdge->setChecked(false);
+            ui->checkBox_FaceDetection->setChecked(false);
+            ui->checkBox_RGB_Modifier->setChecked(false);
+            ui->horizontalSlider_CannyEdge->setValue(0);
+            ui->horizontalSlider_FaceDetection->setValue(50);
+            ui->verticalSlider_R->setValue(0);
+            ui->verticalSlider_G->setValue(0);
+            ui->verticalSlider_B->setValue(0);
+            disconnect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
+            disconnect(timer, SIGNAL(timeout()), this, SLOT(face_detector()));
+            disconnect(timer, SIGNAL(timeout()), this, SLOT(canny_edge()));
+            disconnect(timer, SIGNAL(timeout()), this, SLOT(rgb_modifier()));
+            connect(timer, SIGNAL(timeout()), this, SLOT(fancy_mode()));
+            timer->start(1);
+        }
+        else{
+            disconnect(timer, SIGNAL(timeout()), this, SLOT(fancy_mode()));
+            connect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
+            timer->start(1);
+        }
     }
 }
 
@@ -386,5 +398,8 @@ void Widget::closeEvent(QCloseEvent *event)
     state = false;
     cl_o.stopStream();
     cap_w.release();
-    if(thread_buffer.joinable()){ thread_buffer.join(); }
+    //NOTE if statements more readable if multi-line
+    if(thread_buffer.joinable()){
+        thread_buffer.join();
+    }
 }

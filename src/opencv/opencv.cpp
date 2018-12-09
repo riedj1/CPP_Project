@@ -16,7 +16,10 @@ cv::VideoCapture OpenCV::startStream()
 {
     cv::VideoCapture cap;
     cap.open(0);
-    if(!cap.isOpened()){ std::cout << "Camera is not open" << std::endl; }
+    // WARNING if true, nothing is returned
+    //NOTE multi-line if enhance readability
+    if(!cap.isOpened()){
+        std::cout << "Camera is not open" << std::endl; }
     else{ return cap; };
 }
 
@@ -28,7 +31,9 @@ void OpenCV::stopStream()
 {
     cv::VideoCapture cap;
     cap.release();
-    if(!cap.isOpened()){ std::cout << "Camera is closed" << std::endl; }
+    //NOTE multi-line if enhance readability
+    if(!cap.isOpened()){
+        std::cout << "Camera is closed" << std::endl; }
 }
 
 /**
@@ -40,7 +45,9 @@ void OpenCV::frameBuffer(cv::VideoCapture cap)
 {
     while(state){
         cap >> frame;
-        if(!frame.empty()){ add(frame); }
+        //NOTE multi-line if enhance readability
+        if(!frame.empty()){
+            add(frame); }
     }
 }
 
@@ -51,7 +58,9 @@ void OpenCV::frameBuffer(cv::VideoCapture cap)
 cv::Mat OpenCV::getFrameColor()
 {
     cv::Mat output = get();
-    cv::cvtColor(output, output, CV_BGR2RGB);
+    // FIXME line replaced for opencv4 standard
+//    cv::cvtColor(output, output, CV_BGR2RGB);
+    cv::cvtColor(output, output, cv::COLOR_RGB2BGR);
     cv::resize(output, output, cv::Size(800,600));
     return output;
 }
@@ -63,7 +72,9 @@ cv::Mat OpenCV::getFrameColor()
 cv::Mat OpenCV::getFrameGray()
 {
     cv::Mat output = get();
-    cv::cvtColor(output, output, CV_BGR2GRAY);
+    // FIXME line replaced for opencv4 standard
+//    cv::cvtColor(output, output, CV_BGR2GRAY);
+    cv::cvtColor(output, output, cv::COLOR_BGR2GRAY);
     cv::resize(output, output, cv::Size(800,600));
     return output;
 }
@@ -85,7 +96,10 @@ cv::Mat OpenCV::getFaceFrame(float circle_dia)
     std::vector<cv::Rect> faces;
 
     // Detect faces
-    face_cascade.detectMultiScale(output, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE,
+     // FIXME line replaced for opencv4 standard
+//    face_cascade.detectMultiScale(output, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE,
+//                                  cv::Size(120, 120));
+    face_cascade.detectMultiScale(output, faces, 1.1, 2, 0|cv::CASCADE_SCALE_IMAGE,
                                   cv::Size(120, 120));
 
     // Show the results

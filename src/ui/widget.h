@@ -40,9 +40,11 @@ class Widget : public QWidget
         QSlider *slider;
         QTimer *timer;
         QImage qt_image;
+        //FIXME use {} for default initialization
         bool stateThread = true;
         bool stateStream = true;
         std::thread thread_buffer;
+        //FIXME use camel case for variables ie openCV
         OpenCV cl_o;
 
     private slots:
